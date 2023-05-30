@@ -1,18 +1,26 @@
-import React from 'react';
-import './styles.css';
-import { TodoText } from '../model';
+import React from "react";
+import "./styles.css";
+import { TodoText } from "../model";
+import SingleTodo from "./SingleTodo";
 
 interface Props {
-    todos: TodoText[] ;
-    setTodos: React.Dispatch<React.SetStateAction<TodoText[]>>;
+  todos: TodoText[];
+  setTodos: React.Dispatch<React.SetStateAction<TodoText[]>>;
 }
 
-const TodoList: React.FC<Props> = ({ todos, setTodos}) => {
-  return <div className='todos'>
-        {todos.map ((todo) => (
-            <li>{todo.todoText}</li>
-        ))}
+const TodoList: React.FC<Props> = ({ todos, setTodos }) => {
+  return (
+    <div className="todos">
+      {todos.map((todo) => (
+        <SingleTodo
+          todo={todo}
+          key={todo.id}
+          todos={todos}
+          setTodos={setTodos}
+        />
+      ))}
     </div>
+  );
 };
 
 export default TodoList;

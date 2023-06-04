@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
-import './App.css';
-import InputField from './components/InputField';
-import { TodoText, Actions } from './model';
-import TodoList from './components/TodoList';
+import React, { useState } from "react";
+import "./App.css";
+import InputField from "./components/InputField";
+import { TodoText, Actions } from "./model";
+import TodoList from "./components/TodoList";
 import { useReducer } from "react";
-
-
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 
 const App: React.FC = () => {
-
   const [todoText, setTodoText] = useState<string>("");
   // const [todos, setTodos] = useState<TodoText[]>([]);
+  const [completedTodos, setCompletedTodos] = useState<TodoText[]>([]);
 
   // const handleAdd = (e: React.FormEvent) => {
   //   e.preventDefault();
@@ -22,21 +21,23 @@ const App: React.FC = () => {
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if(todoText){
-      dispatch({type: "add", payload: todoText});
+    if (todoText) {
+      dispatch({ type: "add", payload: todoText });
       setTodoText("");
     }
-  }
+  };
 
   const TodoReducer = (state: TodoText[], action: Actions) => {
     switch (action.type) {
+      case "set":
+        return action.payload;
       case "add":
         return [
           ...state,
-          { id: Date.now(), todoText: action.payload, isDone: false }
+          { id: Date.now(), todoText: action.payload, isDone: false },
         ];
       case "edit":
-        return state.map((todo) => 
+        return state.map((todo) =>
           todo.id === action.id ? { ...todo, todoText: action.payload } : todo
         );
       case "remove":
@@ -52,16 +53,58 @@ const App: React.FC = () => {
 
   const [state, dispatch] = useReducer(TodoReducer, []);
 
-  console.log(state);
-  
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+
+    if (!destination) return;
+    
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    )
+      return;
+    
+    let add,
+      active = state,
+      complete= completedTodos;
+
+    if(source.droppableId==='TodosList') {
+      add=active[source.index];
+      active.splice(source.index, 1);
+    } else {
+      add=complete[source.index];
+      complete.splice(source.index, 1);
+    }
+
+    if(destination.droppableId==='TodosList') {
+      active.splice(destination.index, 0, add);
+    } else {
+      complete.splice(destination.index, 0, add);
+    }
+
+    setCompletedTodos(complete);
+    dispatch({type : 'set', payload: active})
+  };
+
   return (
-    <div className="App">
-      <span className="heading">Taskify</span>
-      <InputField todoText={todoText} setTodoText={setTodoText} handleAdd={handleAdd}/>
-      {/* <TodoList todos={todos} setTodos={setTodos}/> */}
-      <TodoList todos={state} setTodos={dispatch}/>
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="App">
+        <span className="heading">Taskify</span>
+        <InputField
+          todoText={todoText}
+          setTodoText={setTodoText}
+          handleAdd={handleAdd}
+        />
+        {/* <TodoList todos={todos} setTodos={setTodos}/> */}
+        <TodoList
+          todos={state}
+          setTodos={dispatch}
+          completedTodos={completedTodos}
+          setCompletedTodos={setCompletedTodos}
+        />
+      </div>
+    </DragDropContext>
   );
-}
+};
 
 export default App;

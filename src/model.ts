@@ -10,6 +10,7 @@ export interface TodoText {
 //     | { type:'done'; payload: number};
 
 export type Actions = 
+    | { type:'set'; payload: TodoText[]}
     | { type:'add'; payload: string}
     | { type:'edit'; id: number ; payload: string}
     | { type:'remove'; payload: number}

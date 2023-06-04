@@ -1,11 +1,16 @@
 import React from "react";
 import "./styles.css";
-import { TodoText } from "../model";
+import { TodoText, Actions } from "../model";
 import SingleTodo from "./SingleTodo";
+
+// interface Props {
+//   todos: TodoText[];
+//   setTodos: React.Dispatch<React.SetStateAction<TodoText[]>>;
+// }
 
 interface Props {
   todos: TodoText[];
-  setTodos: React.Dispatch<React.SetStateAction<TodoText[]>>;
+  setTodos: React.Dispatch<Actions>;
 }
 
 const TodoList: React.FC<Props> = ({ todos, setTodos }) => {

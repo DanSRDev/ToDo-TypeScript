@@ -77,11 +77,13 @@ const App: React.FC = () => {
 
     if(source.droppableId==='TodosList') {
       add=active[source.index];
-      add.isDone = !add.isDone;
+      if (destination.droppableId !== 'TodosList') 
+        add.isDone = !add.isDone;
       active.splice(source.index, 1);
     } else {
       add=complete[source.index];
-      add.isDone = !add.isDone;
+      if (destination.droppableId !== 'TodosRemove') 
+        add.isDone = !add.isDone;
       complete.splice(source.index, 1);
     }
 

@@ -1,21 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import InputField from "./components/InputField";
 import { TodoText, Actions } from "./model";
 import TodoList from "./components/TodoList";
 import { useReducer } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import useLocalStorage from "./customHooks/useLocalStorage";
 
 const App: React.FC = () => {
+  
+  const [todos, setTodos] = useLocalStorage('todosv1', [])
+  const [completedTodos, setCompletedTodos] = useLocalStorage('completedTodosv1', [])
   const [todoText, setTodoText] = useState<string>("");
-
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (todoText) {
-      dispatch({ type: "add", payload: todoText, done: false });
-      setTodoText("");
-    }
-  };
 
   const TodoReducer = (state: TodoText[], action: Actions) => {
     switch (action.type) {
@@ -44,8 +40,25 @@ const App: React.FC = () => {
     }
   };
 
-  const [state, dispatch] = useReducer(TodoReducer, []);
-  const [completedState, completedDispatch] = useReducer(TodoReducer, []);
+  const [state, dispatch] = useReducer(TodoReducer, todos);
+  const [completedState, completedDispatch] = useReducer(TodoReducer, completedTodos);
+
+  useEffect(() => {
+    setTodos(state)
+  }, [state, setTodos])
+
+  useEffect(() => {
+    setCompletedTodos(completedState)
+  }, [completedState, setCompletedTodos])
+
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (todoText) {
+      dispatch({ type: "add", payload: todoText, done: false });
+      setTodoText("");
+    }
+  };
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -59,8 +72,8 @@ const App: React.FC = () => {
       return;
     
     let add,
-      active = state,
-      complete= completedState;
+      active = state.slice(),
+      complete= completedState.slice();
 
     if(source.droppableId==='TodosList') {
       add=active[source.index];
@@ -77,6 +90,7 @@ const App: React.FC = () => {
     } else {
       complete.splice(destination.index, 0, add);
     }
+
     dispatch({type : 'set', payload: active})
     completedDispatch({type : 'set', payload: complete})
   };

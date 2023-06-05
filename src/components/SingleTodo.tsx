@@ -5,52 +5,25 @@ import { MdDone } from "react-icons/md";
 import "./styles.css";
 import { Draggable } from "react-beautiful-dnd";
 
-// type Props = {
-//   todo: TodoText;
-//   todos: TodoText[];
-//   setTodos: React.Dispatch<React.SetStateAction<TodoText[]>>;
-// };
-
 type Props = {
   index: number;
   todo: TodoText;
   todos: TodoText[];
   setTodos: React.Dispatch<Actions>;
+  setOthers: React.Dispatch<Actions>;
 };
 
-const SingleTodo = ({ index, todo, todos, setTodos }: Props) => {
+const SingleTodo = ({ index, todo, todos, setTodos, setOthers }: Props) => {
   const [edit, setEdit] = useState<boolean>(false);
   const [editTodo, setEditTodo] = useState<string>(todo.todoText);
 
-  // const handleDone = (id: number) => {
-  //   setTodos(
-  //     todos.map((todo) =>
-  //       todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
-  //     )
-  //   );
-  // };
-
   const handleDone = (id: number) => {
-    setTodos({ type: "done", payload: id });
+    setTodos({ type: "done", payload: id, setOthers: setOthers });
   };
-
-  // const handleDelete = (id: number) => {
-  //   setTodos(todos.filter((todo) => todo.id !== id));
-  // };
 
   const handleDelete = (id: number) => {
     setTodos({ type: "remove", payload: id });
   };
-
-  // const handleEdit = (e: React.FormEvent, id: number) => {
-  //   e.preventDefault();
-  //   setTodos(
-  //     todos.map((todo) =>
-  //       todo.id === id ? { ...todo, todoText: editTodo } : todo
-  //     )
-  //   );
-  //   setEdit(false);
-  // };
 
   const handleEdit = (e: React.FormEvent, id: number) => {
     e.preventDefault();
@@ -89,7 +62,7 @@ const SingleTodo = ({ index, todo, todos, setTodos }: Props) => {
 
           <div>
             <span
-              className="icon"
+              className={`icon ${todo.isDone ? 'inactive' : ''}`}
               onClick={() => {
                 if (!edit && !todo.isDone) {
                   setEdit(!edit);

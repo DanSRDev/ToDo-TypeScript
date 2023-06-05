@@ -8,21 +8,11 @@ import { DragDropContext, DropResult } from "react-beautiful-dnd";
 
 const App: React.FC = () => {
   const [todoText, setTodoText] = useState<string>("");
-  // const [todos, setTodos] = useState<TodoText[]>([]);
-  const [completedTodos, setCompletedTodos] = useState<TodoText[]>([]);
-
-  // const handleAdd = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if(todoText){
-  //     setTodos([...todos, {id:Date.now(), todoText, isDone:false}]);
-  //     setTodoText("");
-  //   }
-  // }
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (todoText) {
-      dispatch({ type: "add", payload: todoText });
+      dispatch({ type: "add", payload: todoText, done: false });
       setTodoText("");
     }
   };
@@ -34,7 +24,7 @@ const App: React.FC = () => {
       case "add":
         return [
           ...state,
-          { id: Date.now(), todoText: action.payload, isDone: false },
+          { id: Date.now(), todoText: action.payload, isDone: action.done },
         ];
       case "edit":
         return state.map((todo) =>
@@ -43,15 +33,19 @@ const App: React.FC = () => {
       case "remove":
         return state.filter((todo) => todo.id !== action.payload);
       case "done":
-        return state.map((todo) =>
-          todo.id === action.payload ? { ...todo, isDone: !todo.isDone } : todo
-        );
+        state.forEach((todo) => {
+          if(todo.id === action.payload) {
+            action.setOthers({type: 'add', payload: todo.todoText, done: !todo.isDone})
+          }
+        })
+        return state.filter((todo) => todo.id !== action.payload);
       default:
         return state;
     }
   };
 
   const [state, dispatch] = useReducer(TodoReducer, []);
+  const [completedState, completedDispatch] = useReducer(TodoReducer, []);
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -66,13 +60,15 @@ const App: React.FC = () => {
     
     let add,
       active = state,
-      complete= completedTodos;
+      complete= completedState;
 
     if(source.droppableId==='TodosList') {
       add=active[source.index];
+      add.isDone = !add.isDone;
       active.splice(source.index, 1);
     } else {
       add=complete[source.index];
+      add.isDone = !add.isDone;
       complete.splice(source.index, 1);
     }
 
@@ -81,9 +77,8 @@ const App: React.FC = () => {
     } else {
       complete.splice(destination.index, 0, add);
     }
-
-    setCompletedTodos(complete);
     dispatch({type : 'set', payload: active})
+    completedDispatch({type : 'set', payload: complete})
   };
 
   return (
@@ -95,12 +90,11 @@ const App: React.FC = () => {
           setTodoText={setTodoText}
           handleAdd={handleAdd}
         />
-        {/* <TodoList todos={todos} setTodos={setTodos}/> */}
         <TodoList
           todos={state}
           setTodos={dispatch}
-          completedTodos={completedTodos}
-          setCompletedTodos={setCompletedTodos}
+          completedTodos={completedState}
+          setCompletedTodos={completedDispatch}
         />
       </div>
     </DragDropContext>

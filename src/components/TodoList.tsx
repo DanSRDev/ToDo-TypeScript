@@ -4,30 +4,15 @@ import { TodoText, Actions } from "../model";
 import SingleTodo from "./SingleTodo";
 import { Droppable } from "react-beautiful-dnd";
 
-// interface Props {
-//   todos: TodoText[];
-//   setTodos: React.Dispatch<React.SetStateAction<TodoText[]>>;
-// }
-
 interface Props {
   todos: TodoText[];
   setTodos: React.Dispatch<Actions>;
   completedTodos: TodoText[];
-  setCompletedTodos: React.Dispatch<React.SetStateAction<TodoText[]>>;
+  setCompletedTodos: React.Dispatch<Actions>;
 }
 
 const TodoList: React.FC<Props> = ({ todos, setTodos, completedTodos, setCompletedTodos}) => {
   return (
-    // <div className="todos">
-    //   {todos.map((todo) => (
-    //     <SingleTodo
-    //       todo={todo}
-    //       key={todo.id}
-    //       todos={todos}
-    //       setTodos={setTodos}
-    //     />
-    //   ))}
-    // </div>
     <div className="container">
       <Droppable droppableId="TodosList">
         {(provided, snapshot) => (
@@ -44,6 +29,7 @@ const TodoList: React.FC<Props> = ({ todos, setTodos, completedTodos, setComplet
                 key={todo.id}
                 todos={todos}
                 setTodos={setTodos}
+                setOthers={setCompletedTodos}
               />
             ))}
             {provided.placeholder}
@@ -64,7 +50,8 @@ const TodoList: React.FC<Props> = ({ todos, setTodos, completedTodos, setComplet
                 todo={todo}
                 key={todo.id}
                 todos={completedTodos}
-                setTodos={setTodos}
+                setTodos={setCompletedTodos}
+                setOthers={setTodos}
               />
             ))}
             {provided.placeholder}
